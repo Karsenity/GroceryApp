@@ -21,13 +21,8 @@ def analytics_request_api():
         ProductID | WasOnSaleBoolean | TimePurchased | TimeAddedToList | CountOfProduct
 
     :return: CSV[ProductID, WasOnSaleBoolean, TimePurchased, TimeAddedToList, CountOfProduct]
-    :rtype: list[str]
-
+    :rtype: csv file containing data
     """
-
-
-    # This returns a table with the following data:
-    #       ProductID | WasOnSaleBoolean | TimePurchased | TimeAddedToList | CountOfProduct     #
     return None
 
 
