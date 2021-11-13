@@ -3,7 +3,7 @@ from flask import Flask, Blueprint
 user_app = Blueprint("user_routes", __name__, url_prefix="/user")
 
 
-@user_app.route('/login')
+@user_app.route('/login/')
 def login():
     """Sends login request to server..
 
