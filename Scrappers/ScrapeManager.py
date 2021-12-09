@@ -1,23 +1,29 @@
 from Scrappers.Stores.Walmart import Walmart
+from Scrappers.Stores.WholeFoods import WholeFoods
 
 
 class ScrapeManager:
     def __init__(self):
         self.storeCount = {}
         self.stores = {}
+        self.types = ['walmart', 'wholefoods']
         return
 
 
     def addStore(self, name):
-        if name.lower() == 'walmart':
-            try:
-                curCount = self.storeCount['walmart'] + 1
-                self.storeCount['walmart'] += 1
-            except KeyError:
-                curCount = 1
-                self.storeCount['walmart'] = 1
+        for t in self.types:
+            if name.lower() == t:
+                try:
+                    curCount = self.storeCount[t] + 1
+                    self.storeCount[t] += 1
+                except KeyError:
+                    curCount = 1
+                    self.storeCount[t] = 1
+                if t == 'walmart':
+                    self.stores[t + str(curCount)] = Walmart()
+                if t == 'wholefoods':
+                    self.stores[t + str(curCount)] = WholeFoods()
 
-            self.stores['walmart' + str(curCount)] = Walmart()
 
 
     def runAll(self):

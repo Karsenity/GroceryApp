@@ -27,17 +27,30 @@ class WebDriver:
         self.driver.get(url)
 
 
-    def addEvent(self, event):
+    def addEvent(self, event, first=False):
+        if first:
+            if isinstance(event, list):
+                for i in reversed(range(len(event))):
+                    self.events.insert(0, event[i])
+            else:
+                self.events.insert(0, event)
+            return
+
         if isinstance(event, list):
             for e in event:
                 self.events.append(e)
         else:
             self.events.append(event)
-            return
+        return
 
 
     def step(self):
         print("Events remaining: " + str(len(self.events)))
+        for e in self.events:
+            if e.sourceName != 'Loop':
+                print("\t" + e.sourceName)
+        print()
+
         if len(self.events) == 0:
             try:
                 self.driver.close()
@@ -54,16 +67,16 @@ class WebDriver:
         try:
             e.start()
         except Exception as error:
-            if e.sourceName.lower().find('loading') != -1:
+            if e.failedEvent is not None:
                 newEvent = e.failed()
                 self.events.insert(0, newEvent)
-                print(error)
-                print("\n\n")
-                time.sleep(30)
+                # print(error)
+                # print("\n\n")
                 return
             print(e.sourceName, end='')
             print(" Has failed")
             print(e.description)
+            raise error
             e.failed()
             # self.driver.close()
             # raise error

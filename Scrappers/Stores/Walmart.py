@@ -1,8 +1,6 @@
 import functools
 
-import selenium.common
 from selenium.webdriver import ActionChains
-
 from Scrappers.Event import Event
 from Scrappers.webDriver import WebDriver
 

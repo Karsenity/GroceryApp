@@ -1,7 +1,7 @@
 from Scrappers.ScrapeManager import ScrapeManager
 
 s = ScrapeManager()
-s.addStore('Walmart')
+s.addStore('WholeFoods')
 
 keepGoing = True
 while keepGoing:
