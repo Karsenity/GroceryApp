@@ -55,13 +55,6 @@ def add_transactions():
     return None
 
 
-# TODO
-# Why does this exist? Why is a User getting a history of something
-@backend_user_app.route('/get_transactions')
-def get_transactions():
-    return None
-
-
 @backend_user_app.route('/add_alert')
 def add_alert():
     """
