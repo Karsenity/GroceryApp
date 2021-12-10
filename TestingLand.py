@@ -32,6 +32,8 @@ while keepGoing:
             pass
         print("%d has Executed!" % k)
 
+
+# Basic way of doing it that only opens 1 chrome tab
 # s = ScrapeManager()
 # s.addStore('WholeFoods')
 # keepGoing = True
