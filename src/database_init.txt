@@ -52,16 +52,6 @@ CREATE TABLE User_Alert_Lists (
   FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID)
 );
 
-CREATE TABLE Cur_Price (
-    Product_ID BIGINT NOT NULL,
-    Sale_Type varchar(50),
-    Price FLOAT,
-    Price_History_ID BIGINT NOT NULL,
-    PRIMARY KEY (Product_ID, Sale_Type),
-    FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID),
-    FOREIGN KEY (PRICE_HISTORY_ID) REFERENCES Price_History(Price_History_ID)
-);
-
 CREATE TABLE Price_History (
     Price_History_ID BIGINT NOT NULL AUTO_INCREMENT,
     Product_ID BIGINT NOT NULL,
@@ -71,6 +61,16 @@ CREATE TABLE Price_History (
     End_Date DATETIME NOT NULL,
     PRIMARY KEY (Price_History_ID),
     FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID)
+);
+
+CREATE TABLE Cur_Price (
+    Product_ID BIGINT NOT NULL,
+    Sale_Type varchar(50),
+    Price FLOAT,
+    Price_History_ID BIGINT NOT NULL,
+    PRIMARY KEY (Product_ID, Sale_Type),
+    FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID),
+    FOREIGN KEY (PRICE_HISTORY_ID) REFERENCES Price_History(Price_History_ID)
 );
 
 CREATE TABLE Transaction (
