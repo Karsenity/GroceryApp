@@ -1,12 +1,9 @@
 import mysql.connector as mysql
+from routing.database import Database
 
 
 def connect_admin_level():
-    return mysql.connect(
-        user="root",
-        passwd="1234",
-        database='projectDB'
-    )
+    return Database().admin.get_db()
 
 
 # Date = YYYY-MM-DD
@@ -17,10 +14,13 @@ def add_products(products):
     :return: Pass/Failed
         :rtype: Boolean
     """
-    print(products[0], end='\n\n')
     db = connect_admin_level()
     c = db.cursor()
-    c.close()
+
+    for product in products:
+        #do some sql here
+        pass
+
     #     d = getAdminDatabase()
     #     lines = f.readlines()
     #     for l in lines:

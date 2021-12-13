@@ -1,8 +1,8 @@
 import functools
 
 from selenium.webdriver import ActionChains
-from Scrappers.Event import Event
-from Scrappers.webDriver import WebDriver
+from Scrapers.Event import Event
+from Scrapers.webDriver import WebDriver
 
 
 class Walmart:

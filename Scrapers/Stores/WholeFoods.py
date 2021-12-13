@@ -5,9 +5,9 @@ from datetime import datetime
 import selenium.common
 from selenium.webdriver.common.by import By
 
-from Scrappers.Event import Event
-from Scrappers.Product import Product
-from Scrappers.webDriver import WebDriver
+from Scrapers.Event import Event
+from Scrapers.Product import Product
+from Scrapers.webDriver import WebDriver
 from src.routing.backend_calls import add_products
 
 
@@ -203,7 +203,7 @@ class WholeFoods:
     @DeprecationWarning
     def writeToFile(self, products):
         def wtf():
-            with open('Scrappers/Stores/WholeFoodsAdvanced.txt', 'a') as f:
+            with open('Scrapers/Stores/WholeFoodsAdvanced.txt', 'a') as f:
                 for p in products:
                     # vars split by $$$$$ arrays split by #####
                     s = ''
@@ -377,7 +377,7 @@ class WholeFoods:
     #   Appends to End
     def saveToFile(self):
         def stf():
-            with open('Scrappers/Stores/WholeFoods.txt', 'a') as file:
+            with open('Scrapers/Stores/WholeFoods.txt', 'a') as file:
                 for link in self.links:
                     file.write(link + "\n")
 

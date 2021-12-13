@@ -11,7 +11,7 @@ class Database:
     user = None
     app = None
 
-    def __init__(self, app):
+    def __init__(self, app=None):
         if self.admin is None:
             self.app = app
             self.admin = self.connect_admin_level()
@@ -19,13 +19,13 @@ class Database:
         return
 
     def connect_admin_level(self):
-        return MySQL(self.app, prefix="Admin", host="localhost", user="root",
-                     password="1234", db="projectDB", autocommit=True,
+        return MySQL(self.app, host="%", user="root",
+                     password="password", db="grocery_app_db", autocommit=True,
                      cursorclass=pymysql.cursors.DictCursor)
 
     def connect_user_level(self):
-        return MySQL(self.app, prefix="User", host="localhost", user="newuser",
-                     password="1234", db="projectDB", autocommit=True,
+        return MySQL(self.app, prefix="User", host="localhost", user="customer",
+                     password="1234", db="grocery_app_db", autocommit=True,
                      cursorclass=pymysql.cursors.DictCursor)
 
         # return mysql.connect(
@@ -33,6 +33,15 @@ class Database:
         #     passwd="1234",
         #     database='projectDB'
         # )
+
+
+def init_db():
+    conn = mysql.connect(user="root", password="password")
+    cur = conn.cursor()
+    with open("database_init.txt") as sql_file:
+        sql_as_string = sql_file.read()
+        cur.execute(sql_as_string)
+    conn.close()
 
 
 def testing():

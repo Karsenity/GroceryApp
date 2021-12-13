@@ -1,2 +1,6 @@
 flask~=2.0.2
 selenium~=4.1.0
+mysql-connector-python
+PyMySQL
+Flask-Ext
+Flask-MySQL

@@ -1,8 +1,8 @@
 import mysql.connector as mysql
 from flask import Flask
 
-from Scrappers.ScrapeManager import ScrapeManager
-from Scrappers.Stores.WholeFoods import WholeFoods
+from Scrapers.ScrapeManager import ScrapeManager
+from Scrapers.Stores.WholeFoods import WholeFoods
 
 
 # Fake MySQL database
