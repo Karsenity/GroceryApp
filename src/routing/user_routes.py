@@ -85,3 +85,6 @@ def get_transactions():
     """
     return None
 
+@user_app.route('/home')
+def home():
+    return "How's it going?"

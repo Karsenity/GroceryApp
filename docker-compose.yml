@@ -1,0 +1,17 @@
+version: "2"
+services:
+    app:
+        image: grocery-app
+        build: ./src
+        links:
+            - db
+        ports:
+            - "5000:5000"
+    db:
+        image: mysql:latest
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: password
+        volumes:
+            - ./db:/docker-entrypoint-initdb.d/:ro
