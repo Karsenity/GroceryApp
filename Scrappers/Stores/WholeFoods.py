@@ -1,46 +1,101 @@
 import functools
 import time
-from telnetlib import EC
+from datetime import datetime
 
 import selenium.common
-from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
 
 from Scrappers.Event import Event
 from Scrappers.Product import Product
 from Scrappers.webDriver import WebDriver
+from src.routing.backend_calls import add_products
+
+
+def _formatDate(dateText):
+    # Format durationText
+    currentDateTime = datetime.now()
+    date = currentDateTime.date()
+    year = date.strftime("%Y")
+
+    dateText = dateText.replace(' ', '').replace('Valid', '')
+    dateText = dateText[0:dateText.find('|')]
+    dateRange = dateText.split('-')
+    months = []
+    for i in range(len(dateRange)):
+        vals = dateRange[i].split('/')
+        for j in range(len(vals)):
+            if len(vals[j]) != 2:
+                vals[j] = "0" + vals[j]
+        dateRange[i] = vals[0] + '-' + vals[1]
+        months.append(vals[0])
+    if months[0] > months[1]:
+        dateRange[1] = str(int(year) + 1) + '-' + dateRange[1]
+        dateRange[0] = str(int(year))     + '-' + dateRange[0]
+    else:
+        dateRange[1] = str(int(year)) + '-' + dateRange[1]
+        dateRange[0] = str(int(year)) + '-' + dateRange[0]
+    return dateRange
+
+
+def formatProducts(name, prices, pics, durationText, url):
+    many = False
+    if len(prices) > 1:
+        many = True
+        # Format durationText
+        durationText = _formatDate(durationText)
+
+
+    retVal = []
+    for p in prices:
+        saleType = 'Regular'
+        unit = 'default'
+
+        # Deal with sales
+        if many:
+            for sale in ['Regular', 'Sale Price', 'Prime Member Price']:
+                pos = p.find(sale)
+                if pos != -1:
+                    p = p.split(sale)[1]
+                    saleType = sale.replace('Price', '')
+            assert(saleType != 'None')
+
+        # Case 1, they are a /lb or other type of unit
+        if p.find('/') != -1:
+            priceUnit = p.split('/')
+            p = priceUnit[0]
+            unit = priceUnit[1]
+        # Case 2, It is a Num for PRICE
+        if p.find(' for ') != -1:
+            countPrice = p.split(' for ')
+            unit = countPrice[0]
+            p = countPrice[1]
+        # Case 3, There is $ sign
+        if p.find('$') != -1:
+            p = p.split('$')[1]
+        # Case 4, there is a ¢ sign
+        if p.find('¢') != -1:
+            p = '0.' + p.split('¢')[0]
+        product = Product(name=name, price=float(p), quantity=unit, typeOfSale=saleType, url=url,
+                          picURLs=pics, saleRange=durationText)
+        retVal.append(product)
+    return retVal
 
 
 class WholeFoods:
-    def __init__(self, products=None):
+    def __init__(self):
         self.webDriver = None  # Handles executing our commands
         self.driver = None
         self.name = 'WholeFoods'
-        self.links = []  # This is used to write to a file
+        self.links = []  # This stores the current batch of links
         self.categories = []  # This stores strings of all the categories
-        self.products = []  # This stored Product Objects to be written to file
         self.setup()
-        self.fillEvents(products)
+        self.fillEvents()
         return
 
-    # This opens a chrome window
+    # This opens a Chrome window
     def setup(self):
         self.webDriver = WebDriver()
         self.driver = self.webDriver.driver
-        # open('Scrappers/Stores/WholeFoods.txt', 'w').close()
-        return
-
-    # This is the "Main Diagram" of the program. This shows us the initial order of events.
-    #   A high level of events is
-    #   goToHome() ->  dealWithLocation -> selectLocation -> ExpandCategories -> ScrapeCategories
-    def fillEvents(self, p):
-        self.goToHome()  # Go to main page
-        self.dealWithLocation()  # If the Location box exists, fill in our address
-        # self.expandCategories()  # Show all categories
-        # self.scrapeCategories()  # Being scraping each category 1 by 1. More details over that function
-        self.scrapeProducts(p)
-        self.writeToFile()
         return
 
     # This navigates to the Wholefoods website
@@ -56,24 +111,48 @@ class WholeFoods:
     def step(self):
         return self.webDriver.step()
 
+    # This is the "Main Diagram" of the program. This shows us the initial order of events.
+    #   A high level of events is
+    #   goToHome() ->  dealWithLocation -> selectLocation -> ExpandCategories -> ScrapeCategories -> _scrapeCategories
+    #       -> openCategoryPage -> loadMore -> GetAllLinks -> ScrapeProducts -> -> OpenProductPage -> _scrapeProduct
+    #       -> add_products -> Go Home -> Expand Categories -> loop :)
+    def fillEvents(self):
+        self.goToHome()  # Go to main page
+        self.dealWithLocation()  # If the Location box exists, fill in our address
+        self.expandCategories()  # Show all categories
+        self.scrapeCategories()  # Being scraping each category 1 by 1. More details over that function
+        return
+
+    def restart(self):
+        def r():
+            self.links = []
+            self.categories = []
+            self.fillEvents()
+
+        res = functools.partial(r)
+        restartEvent = Event(res, failedEvent=res, sourceName="Restart Everything to Scrape Anew",
+                             description="We restart :)")
+        self.webDriver.addEvent(restartEvent)
 
     def scrapeProducts(self, urls=None):
         if urls is None:
-            with open('Scrappers/Stores/WholeFoods.txt', 'r') as f:
-                sites = f.readlines()
+            sites = self.links
+            sites = self.links
         else:
-            # sites = [u + '\n' for u in urls]
             sites = urls
+
         for s in sites:
             # Open URL
-            openURL = functools.partial(self.driver.get, s[0:-1])  # [0:-1] to remove new line
+            openURL = functools.partial(self.driver.get, s)
             goToURL = Event(openURL, sourceName="Open Product URL", description="Open a product's page")
             # Scrape URL
             scrape = functools.partial(self._scrapeProduct, self.driver)
-            scrapeEvent = Event(scrape, failedEvent=scrape, sourceName="Scrape A Product Page", description="Scrape a Product page, if fails it will retry")
+            scrapeEvent = Event(scrape, failedEvent=scrape, sourceName="Scrape A Product Page",
+                                description="Scrape a Product page, if fails it will retry forever")
 
-            self.webDriver.addEvent(goToURL)
-            self.webDriver.addEvent(scrapeEvent)
+            self.webDriver.addEvent(scrapeEvent, first=True)
+            self.webDriver.addEvent(goToURL, first=True)
+        self.links = []
         return
 
 
@@ -82,7 +161,7 @@ class WholeFoods:
         print(driver.current_url)
         try:
             div = driver.find_element(By.CLASS_NAME, 'w-pie--sold-in-store')
-            if div.text == 'Currently not sold in Orlando':
+            if div.text.find('Currently not sold') != -1:
                 return
         except selenium.common.exceptions.NoSuchElementException:
             pass
@@ -111,63 +190,21 @@ class WholeFoods:
 
 
         # Create a Product Object
-        products = self.formatProducts(name, prices, pics, durationText, driver.current_url)
+        products = formatProducts(name, prices, pics, durationText, driver.current_url)
+        dbAddFunct = functools.partial(add_products, products)
+        dbAdd = Event(dbAddFunct, sourceName="Add Product To DB", description="Add our product to our Database")
+        self.webDriver.addEvent(dbAdd, first=True)
         # print(len(products))
         # for p in products:
         #     print("\t\t%s\t%g\t%s\t%s" % (p.name, p.price, p.quantity, p.typeOfSale))
         return
 
 
-    # TODO get unit from Name
-    def formatProducts(self, name, prices, pics, durationText, url):
-        many = False
-        if len(prices) > 1:
-            many = True
-            # Format durationText
-            durationText = durationText.replace(' ', '').replace('Valid', '')
-            durationText = durationText[0:durationText.find('|')]
-
-        retVal = []
-        for p in prices:
-            saleType = 'Regular'
-            unit = 'default'
-
-            # Deal with sales
-            if many:
-                for sale in ['Regular', 'Sale Price', 'Prime Member Price']:
-                    pos = p.find(sale)
-                    if pos != -1:
-                        p = p.split(sale)[1]
-                        saleType = sale.replace('Price', '')
-                assert(saleType != 'None')
-
-            # Case 1, they are a /lb or other type of unit
-            if p.find('/') != -1:
-                priceUnit = p.split('/')
-                p = priceUnit[0]
-                unit = priceUnit[1]
-            # Case 2, It is a Num for PRICE
-            if p.find(' for ') != -1:
-                countPrice = p.split(' for ')
-                unit = countPrice[0]
-                p = countPrice[1]
-            # Case 3, There is $ sign
-            if p.find('$') != -1:
-                p = p.split('$')[1]
-            # Case 4, there is a ¢ sign
-            if p.find('¢') != -1:
-                p = '0.' + p.split('¢')[0]
-            product = Product(name=name, price=float(p), quantity=unit, typeOfSale=saleType, url=url,
-                              picURLs=pics, saleRange=durationText)
-            retVal.append(product)
-            self.products.append(product)
-        return retVal
-
-
-    def writeToFile(self):
+    @DeprecationWarning
+    def writeToFile(self, products):
         def wtf():
             with open('Scrappers/Stores/WholeFoodsAdvanced.txt', 'a') as f:
-                for p in self.products:
+                for p in products:
                     # vars split by $$$$$ arrays split by #####
                     s = ''
                     s += p.name + '$'*5
@@ -202,7 +239,7 @@ class WholeFoods:
         return
 
 
-    # This just populates our self.categories array so we know what categories we have
+    # This just populates our self.categories array, so we know what categories we have
     #   You could technically just not call this and have _scrapeCategories just not
     #   Open any categories it has already seen.
     # Appends to End of events
@@ -223,7 +260,7 @@ class WholeFoods:
 
     # This populates events that is as follows.
     #   For every Category
-    #       Click Link -> Spam Load More button -> Get All Links -> Save to File -> Go Home -> Expand Categories
+    #       Click Link -> Spam Load More button -> Get All Links -> Scrape All Products -> Go Home -> Expand Categories
     # Appends to End
     def _scrapeCategories(self):
         # This opens a category we haven't opened before. This opens it in the main page aka Tab 1.
@@ -237,16 +274,23 @@ class WholeFoods:
                     if linkDiv.text == category:
                         linkDiv.click()
                         break
+            else:
+                self.restart()  # This just lets us loop indefinitely
             return
 
         # For every category
         for c in self.categories:
             goTo = functools.partial(openCategoryPage, self.driver)
-            e = Event(goTo, sourceName="Open Category Page", description='Click on a category')
-            self.webDriver.addEvent(e)
+            goToPage = Event(goTo, sourceName="Open Category Page", description='Click on a category')
+            scrapeAllProductsFunct = functools.partial(self.scrapeProducts)
+            scrapeAllProducts = Event(scrapeAllProductsFunct, sourceName="Scrape All Products",
+                                      description='When run, grabs all self.links and adds search events '
+                                                  'for all products found')
+
+            self.webDriver.addEvent(goToPage)
             self.loadMore()
             self.getAllLinks()
-            self.saveToFile()
+            self.webDriver.addEvent(scrapeAllProducts)
             self.goToHome()
             self.expandCategories()
         return

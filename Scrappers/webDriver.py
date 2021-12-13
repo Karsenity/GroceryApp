@@ -1,4 +1,5 @@
 import time
+import traceback
 
 import selenium.common
 from selenium import webdriver
@@ -66,6 +67,9 @@ class WebDriver:
 
     # Just tells us what our Event stack looks like
     def fancyPrint(self):
+        if self.events[0].sourceName.find("Load") != -1:
+            return
+
         print("Events remaining: " + str(len(self.events)))
         for i in range(len(self.events)):
             if i <= 4:
@@ -89,6 +93,7 @@ class WebDriver:
                 newEvent = e.failed()
                 self.events.insert(0, newEvent)
                 # print(error)
+                # print(traceback.format_exc())
                 return
             print(e.sourceName, end='')
             print(" Has failed")
