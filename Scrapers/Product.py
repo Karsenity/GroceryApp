@@ -1,5 +1,5 @@
 class Product:
-    def __init__(self, name, price, quantity, saleRange, typeOfSale, url, picURLs):
+    def __init__(self, store_id, name, price, quantity, saleRange, typeOfSale, url, picURLs):
         self.price = price  # Float
         self.name = name
         self.quantity = quantity

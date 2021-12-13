@@ -9,23 +9,13 @@ CREATE TABLE Store (
     PRIMARY KEY (Store_ID)
 );
 
-CREATE TABLE Price_History (
-    Price_History_ID BIGINT NOT NULL AUTO_INCREMENT,
-    Start_Date DATETIME NOT NULL,
-    End_Date DATETIME NOT NULL,
-    Price FLOAT,
-    PRIMARY KEY (Price_History_ID)
-);
-
 CREATE TABLE Products (
    Product_ID BIGINT NOT NULL AUTO_INCREMENT,
    Store_ID BIGINT NOT NULL,
    Name VARCHAR(50) NOT NULL,
-   Price_History_ID BIGINT NOT NULL,
    Quantity INT NOT NULL,
    Link_To_Item_URL VARCHAR(120),
    PRIMARY KEY ( Product_ID ),
-   FOREIGN KEY (Price_History_ID) REFERENCES Price_History(Price_History_ID),
    FOREIGN KEY (Store_ID) REFERENCES Store(Store_ID)
 );
 
@@ -45,8 +35,10 @@ CREATE TABLE User (
 CREATE TABLE User_Lists (
     Username VARCHAR(102) NOT NULL,
     Product_ID BIGINT NOT NULL,
+    Sale_Type VARCHAR(50) NOT NULL,
     Time_Added DATETIME,
-    PRIMARY KEY (Username, Product_ID),
+    Count INT NOT NULL,
+    PRIMARY KEY (Username, Product_ID, Sale_Type),
     FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID),
     FOREIGN KEY (Username) REFERENCES User(Username)
 );
@@ -60,22 +52,34 @@ CREATE TABLE User_Alert_Lists (
   FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID)
 );
 
-CREATE TABLE Sale_History (
+CREATE TABLE Cur_Price (
+    Product_ID BIGINT NOT NULL,
+    Sale_Type varchar(50),
+    Price FLOAT,
     Price_History_ID BIGINT NOT NULL,
-    Sale_Type VARCHAR(255) NOT NULL,
-    PRIMARY KEY (Price_History_ID, Sale_Type),
-    FOREIGN KEY (Price_History_ID) REFERENCES Price_History(Price_History_ID)
+    PRIMARY KEY (Product_ID, Sale_Type),
+    FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID),
+    FOREIGN KEY (PRICE_HISTORY_ID) REFERENCES Price_History(Price_History_ID)
+);
+
+CREATE TABLE Price_History (
+    Price_History_ID BIGINT NOT NULL AUTO_INCREMENT,
+    Product_ID BIGINT NOT NULL,
+    Sale_Type varchar(50),
+    Price FLOAT,
+    Start_Date DATETIME NOT NULL,
+    End_Date DATETIME NOT NULL,
+    PRIMARY KEY (Price_History_ID),
+    FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID)
 );
 
 CREATE TABLE Transaction (
     Transaction_ID BIGINT NOT NULL AUTO_INCREMENT,
-    Product_ID BIGINT NOT NULL,
     Price_History_ID BIGINT NOT NULL,
     Username VARCHAR(102) NOT NULL,
     Time_Added DATETIME NOT NULL,
     Count_of_Item INT NOT NULL,
     PRIMARY KEY (Transaction_ID),
-    FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID),
     FOREIGN KEY (Price_History_ID) REFERENCES Price_History(Price_History_ID),
     FOREIGN KEY (Username) REFERENCES User(Username)
 );
@@ -86,7 +90,6 @@ GRANT SELECT ON grocery_app_db.Store TO 'customer'@'localhost';
 GRANT SELECT ON grocery_app_db.Products TO 'customer'@'localhost';
 GRANT SELECT ON grocery_app_db.Images TO 'customer'@'localhost';
 GRANT SELECT ON grocery_app_db.Price_History TO 'customer'@'localhost';
-GRANT SELECT ON grocery_app_db.Sale_History TO 'customer'@'localhost';
 
 GRANT SELECT, INSERT, DELETE ON grocery_app_db.User_Lists TO 'customer'@'localhost';
 GRANT SELECT, INSERT, DELETE ON grocery_app_db.User_Alert_Lists TO 'customer'@'localhost';
