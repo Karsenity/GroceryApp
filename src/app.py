@@ -15,10 +15,16 @@ blueprints = [
 [app.register_blueprint(bp) for bp in blueprints]
 
 
-# Database connected to Flask
-d = Database(app)
 # d.user.get_db().cursor()
 # d.admin.get_db().cursor()
+# @app.before_first_request
+# def initialize_database():
+#     try:
+#         # Database connected to Flask
+#         d = Database(app)
+#     except Exception as e:
+#         print(e)
+#         initialize_database()
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -26,7 +32,7 @@ def home():
     return "none"
 
 
-app.run()
+#app.run()
 
 
 
