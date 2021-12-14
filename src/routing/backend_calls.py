@@ -29,33 +29,34 @@ def add_products(products):
         result = c.fetchall()
 
         # Check Item URL is same
-        if result[0]['Link_To_Item_URL'] != p.url:
-            changeURLCommand = "UPDATE products SET Link_To_Item_URL = '%s' WHERE (Store_ID = %d) AND (Name = '%s') " \
-                               "AND (Quantity = '%s')" % (p.url, p.storeID, p.name, p.quantity)
-            c.execute(changeURLCommand)
-            print("\tURL CHANGED")
+        if len(result) != 0:
+            if result[0]['Link_To_Item_URL'] != p.url:
+                changeURLCommand = "UPDATE products SET Link_To_Item_URL = '%s' WHERE (Store_ID = %d) AND (Name = '%s') " \
+                                   "AND (Quantity = '%s')" % (p.url, p.storeID, p.name, p.quantity)
+                c.execute(changeURLCommand)
+                print("\tURL CHANGED")
 
-        # Make sure image URLs are the same
-        getImagesCommand = "SELECT Image_URL FROM images WHERE Product_ID = '%d'" % result[0]['Product_ID']
-        c.execute(getImagesCommand)
-        images = c.fetchall()
-        curLooking = p.picURLs.copy()
-        mustUpdate = False
-        for i in images:
-            if i['Image_URL'] in curLooking:
-                curLooking.remove(i['Image_URL'])
-            else:
-                mustUpdate = True
-        if len(curLooking) != 0 or mustUpdate:
-            print("\tNEW IMAGES IDENTIFIED!")
-            # We have new imageURLs
-            removeAllImageURLCommand = "DELETE FROM images WHERE Product_ID = %d" % result[0]['Product_ID']
-            c.execute(removeAllImageURLCommand)
-            # Insert All New Image URLs
-            for imageURL in p.picURLs:
-                insertImagesCommand = "INSERT INTO images (Product_ID, Image_URL) VALUES (%d, '%s');" \
-                                      % (result[0]['Product_ID'], imageURL)
-                c.execute(insertImagesCommand)
+            # Make sure image URLs are the same
+            getImagesCommand = "SELECT Image_URL FROM images WHERE Product_ID = '%d'" % result[0]['Product_ID']
+            c.execute(getImagesCommand)
+            images = c.fetchall()
+            curLooking = p.picURLs.copy()
+            mustUpdate = False
+            for i in images:
+                if i['Image_URL'] in curLooking:
+                    curLooking.remove(i['Image_URL'])
+                else:
+                    mustUpdate = True
+            if len(curLooking) != 0 or mustUpdate:
+                print("\tNEW IMAGES IDENTIFIED!")
+                # We have new imageURLs
+                removeAllImageURLCommand = "DELETE FROM images WHERE Product_ID = %d" % result[0]['Product_ID']
+                c.execute(removeAllImageURLCommand)
+                # Insert All New Image URLs
+                for imageURL in p.picURLs:
+                    insertImagesCommand = "INSERT INTO images (Product_ID, Image_URL) VALUES (%d, '%s');" \
+                                          % (result[0]['Product_ID'], imageURL)
+                    c.execute(insertImagesCommand)
 
         # Item does not exist
         if len(result) == 0:
@@ -77,9 +78,14 @@ def add_products(products):
                 c.execute(insertImagesCommand)
 
             # Insert Into [price_history]
-            insertPriceHistory = "INSERT INTO price_history (Product_ID, Sale_Type, Price, Start_Date, End_Date) Values " \
-                                 "(%d, '%s', %g, '%s', '%s')" % (productID, p.typeOfSale, p.price,
+            if p.saleRange[0] == 'NULL':
+                insertPriceHistory = "INSERT INTO price_history (Product_ID, Sale_Type, Price, Start_Date, End_Date) Values " \
+                                     "(%d, '%s', %g, %s, %s)" % (productID, p.typeOfSale, p.price,
                                                                  p.saleRange[0], p.saleRange[1])
+            else:
+                insertPriceHistory = "INSERT INTO price_history (Product_ID, Sale_Type, Price, Start_Date, End_Date) Values " \
+                                     "(%d, '%s', %g, '%s', '%s')" % (productID, p.typeOfSale, p.price,
+                                                                     p.saleRange[0], p.saleRange[1])
             c.execute(insertPriceHistory)
 
             # Insert Into [cur_price]
@@ -119,15 +125,17 @@ def add_products(products):
                                       % (i['Price_History_ID'], i['Product_ID'])
                     c.execute(findSaleCommand)
                     dates = c.fetchall()[0]
+
                     # Start or End Changed
-                    startDate = dates['Start_Date'].strftime('%Y-%m-%d')
-                    endDate   = dates['End_Date'].strftime('%Y-%m-%d')
-                    if startDate != p.saleRange[0] or endDate != p.saleRange[1]:
-                        print("\tNEW SALE TIMES LOCATED!")
-                        updateSaleTimesCommand = "UPDATE price_history SET Start_date = '%s', End_Date = '%s'" \
-                                                 " WHERE Price_History_ID = '%s'" % \
-                                                 (p.saleRange[0], p.saleRange[1], i['Price_History_ID'])
-                        c.execute(updateSaleTimesCommand)
+                    if dates['Start_Date'] is not None:
+                        startDate = dates['Start_Date'].strftime('%Y-%m-%d')
+                        endDate = dates['End_Date'].strftime('%Y-%m-%d')
+                        if startDate != p.saleRange[0] or endDate != p.saleRange[1]:
+                            print("\tNEW SALE TIMES LOCATED!")
+                            updateSaleTimesCommand = "UPDATE price_history SET Start_date = '%s', End_Date = '%s'" \
+                                                     " WHERE Price_History_ID = '%s'" % \
+                                                     (p.saleRange[0], p.saleRange[1], i['Price_History_ID'])
+                            c.execute(updateSaleTimesCommand)
                     break
 
             # No Sale Type for Product
@@ -158,8 +166,7 @@ def add_products(products):
                                                 result['Product_ID'], p.typeOfSale, p.price,
                                                 priceHistoryID)
                     c.execute(insertCurPriceCommand)
-        print()
-    print("%d Products Processed!" % len(products))
+    print("%d Products Processed!\n" % len(products))
     return
 
 
