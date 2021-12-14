@@ -12,9 +12,9 @@ CREATE TABLE Store (
 CREATE TABLE Products (
    Product_ID BIGINT NOT NULL AUTO_INCREMENT,
    Store_ID BIGINT NOT NULL,
-   Name VARCHAR(100) NOT NULL,
+   Name VARCHAR(128) NOT NULL,
    Quantity VARCHAR(30) NOT NULL,
-   Link_To_Item_URL VARCHAR(120),
+   Link_To_Item_URL VARCHAR(248),
    PRIMARY KEY ( Product_ID ),
    FOREIGN KEY (Store_ID) REFERENCES Store(Store_ID)
 );
@@ -107,4 +107,4 @@ INSERT INTO Cur_Price VALUES (1, 'test_sale_type_1', 3.14, 1);
 # Test User
 INSERT INTO grocery_app_db.User VALUES ('test_user_1', 'pbkdf2:sha256:150000$iij8501J$7941a86191d414ff233a8239939dacab895b5b18a74e5e4ad607f5849076bb98');
 # Test User_Lists
-INSERT INTO grocery_app_db.User_Lists VALUES ('test_user_1', 1, 'test_sale_type_1', '2020-01-01 15:10:10', 1)
+INSERT INTO grocery_app_db.User_Lists VALUES ('test_user_1', 1, 'test_sale_type_1', '2020-01-01 15:10:10', 1);
