@@ -43,6 +43,8 @@ def formatProducts(name, prices, pics, durationText, url):
         many = True
         # Format durationText
         durationText = _formatDate(durationText)
+    else:
+        durationText = [None, None]
 
 
     retVal = []
@@ -76,7 +78,7 @@ def formatProducts(name, prices, pics, durationText, url):
         if p.find('¢') != -1:
             p = '0.' + p.split('¢')[0]
         product = Product(name=name, price=float(p), quantity=unit, typeOfSale=saleType, url=url,
-                          picURLs=pics, saleRange=durationText)
+                          picURLs=pics, saleRange=durationText, storeID=1)
         retVal.append(product)
     return retVal
 
@@ -183,7 +185,7 @@ class WholeFoods:
         # print(prices)
 
         # If multiple prices that means sale. Look for sale Duration
-        durationText = "None"
+        durationText = 'NULL'
         if len(prices) > 1:
             spans = bigPriceDiv.find_elements(By.TAG_NAME, 'span')
             durationText = spans[len(spans)-1].text

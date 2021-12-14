@@ -13,7 +13,7 @@ CREATE TABLE Products (
    Product_ID BIGINT NOT NULL AUTO_INCREMENT,
    Store_ID BIGINT NOT NULL,
    Name VARCHAR(50) NOT NULL,
-   Quantity VARCHAR(30) NOT NULL,
+   Quantity INT NOT NULL,
    Link_To_Item_URL VARCHAR(120),
    PRIMARY KEY ( Product_ID ),
    FOREIGN KEY (Store_ID) REFERENCES Store(Store_ID)
@@ -21,7 +21,7 @@ CREATE TABLE Products (
 
 CREATE TABLE Images (
     Product_ID BIGINT NOT NULL,
-    Image_URL VARCHAR(255),
+    Image_URL VARCHAR(500),
     PRIMARY KEY (Product_ID, Image_URL),
     FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID)
 );
@@ -57,8 +57,8 @@ CREATE TABLE Price_History (
     Product_ID BIGINT NOT NULL,
     Sale_Type varchar(50),
     Price FLOAT,
-    Start_Date DATETIME NOT NULL,
-    End_Date DATETIME NOT NULL,
+    Start_Date DATETIME,
+    End_Date DATETIME,
     PRIMARY KEY (Price_History_ID),
     FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID)
 );
@@ -101,4 +101,3 @@ GRANT SELECT ON grocery_app_db.Price_History TO 'customer'@'127.0.0.1';
 
 GRANT SELECT, INSERT, DELETE ON grocery_app_db.User_Lists TO 'customer'@'127.0.0.1';
 GRANT SELECT, INSERT, DELETE ON grocery_app_db.User_Alert_Lists TO 'customer'@'127.0.0.1';
-

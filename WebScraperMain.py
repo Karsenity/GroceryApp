@@ -1,6 +1,7 @@
 import mysql.connector as mysql
 from flask import Flask
 
+from Scrapers.Product import Product
 from Scrapers.ScrapeManager import ScrapeManager
 from Scrapers.Stores.WholeFoods import WholeFoods
 
@@ -28,6 +29,8 @@ from Scrapers.Stores.WholeFoods import WholeFoods
 # keepGoing = True
 # while keepGoing:
 #     keepGoing = w.step()
+from src.routing.backend_calls import add_products
+from src.routing.database import Database
 
 
 # Basic way of doing it that only opens 1 Chrome tab
