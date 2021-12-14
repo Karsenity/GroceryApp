@@ -51,7 +51,7 @@ class WebDriver:
     #   Returns False if done, True if more things to do.
     # Calls _runEvent to actually execute code stored in self.events
     def step(self):
-        # self.fancyPrint()
+        self.fancyPrint()
 
         if len(self.events) == 0:
             try:
@@ -92,8 +92,8 @@ class WebDriver:
             if e.failedEvent is not None:
                 newEvent = e.failed()
                 self.events.insert(0, newEvent)
-                # print(error)
-                # print(traceback.format_exc())
+                print(error)
+                print(traceback.format_exc())
                 return
             print(e.sourceName, end='')
             print(" Has failed")

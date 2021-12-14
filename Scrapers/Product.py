@@ -1,6 +1,6 @@
 class Product:
-    def __init__(self, name, price, quantity, saleRange, typeOfSale, url, picURLs, product_id=None, store_id=1):
-        self.store_id = store_id
+    def __init__(self, name, price, quantity, saleRange, typeOfSale, url, picURLs, storeID=1):
+        self.storeID = storeID
         self.name = name
         self.price = price  # Float
         self.quantity = quantity
@@ -8,9 +8,6 @@ class Product:
         self.typeOfSale = typeOfSale
         self.url = url
         self.picURLs = picURLs
-        # product_id may or may not be defined at a given point, depending if the data has come
-        #   from products or is going into products.
-        self.product_id = product_id
 
     def __repr__(self):
         s = ''
