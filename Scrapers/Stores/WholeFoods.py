@@ -44,7 +44,7 @@ def formatProducts(name, prices, pics, durationText, url):
         # Format durationText
         durationText = _formatDate(durationText)
     else:
-        durationText = ['NULL', 'NULL']
+        durationText = [None, None]
 
 
     retVal = []
