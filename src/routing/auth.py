@@ -80,11 +80,11 @@ def register():
 @auth.route("/login", methods=("GET", "POST"))
 def login():
     """Log in a registered user by adding the user id to the session."""
+    error = None
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
         db = Database().admin.get_db().cursor()
-        error = None
         db.execute("SELECT * FROM User WHERE Username = '%s'" % username)
         user = db.fetchone()
         if user is None:
@@ -95,11 +95,11 @@ def login():
         if error is None:
             # store the user id in a new session and return to the index
             session.clear()
-            session["user_id"] = user["Username"]
-            return redirect(url_for("index"))
+            session["Username"] = user["Username"]
+            return redirect(url_for("user_routes.retrieve_user_list"))
         flash(error)
 
-    return render_template("auth/login.html")
+    return render_template("auth/login.html", error=error)
 
 
 @auth.route("/logout")

@@ -41,8 +41,6 @@ def initialize_db_conn():
 # TODO: Figure out what homepage is going to actually go to/do
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    print(type(d.admin))
-    print(type(d.admin.get_db()))
     return "none"
 
 

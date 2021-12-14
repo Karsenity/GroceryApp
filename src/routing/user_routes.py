@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint
+from flask import Flask, Blueprint, render_template
 from routing.auth import login_required
 from flask import g
 from routing.database import Database
@@ -14,9 +14,9 @@ def retrieve_user_list():
     :return: list of products
         :rtype: list
     """
-    db = Database.user.get_db().cursor()
-    products = db.execute("SELECT * FROM User_Lists WHERE Username='%s'" % g.user["Username"])
-    return products
+    # db = Database.user.get_db().cursor()
+    # products = db.execute("SELECT * FROM User_Lists WHERE Username='%s'" % g.user["Username"])
+    return render_template("user/user_list.html")
 
 @user_app.route('/user_list_add')
 @login_required
