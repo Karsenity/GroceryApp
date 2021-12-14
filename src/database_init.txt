@@ -4,7 +4,7 @@ USE grocery_app_db;
 CREATE TABLE Store (
     Store_ID BIGINT NOT NULL AUTO_INCREMENT,
     Name VARCHAR(50) NOT NULL,
-    Location VARCHAR(16),
+    Location VARCHAR(50),
     Hours_of_Operation VARCHAR(50),
     PRIMARY KEY (Store_ID)
 );
@@ -13,7 +13,7 @@ CREATE TABLE Products (
    Product_ID BIGINT NOT NULL AUTO_INCREMENT,
    Store_ID BIGINT NOT NULL,
    Name VARCHAR(50) NOT NULL,
-   Quantity INT NOT NULL,
+   Quantity VARCHAR(30) NOT NULL,
    Link_To_Item_URL VARCHAR(120),
    PRIMARY KEY ( Product_ID ),
    FOREIGN KEY (Store_ID) REFERENCES Store(Store_ID)
@@ -84,12 +84,21 @@ CREATE TABLE Transaction (
     FOREIGN KEY (Username) REFERENCES User(Username)
 );
 
-CREATE USER 'customer'@'localhost' IDENTIFIED BY '1234';
 
-GRANT SELECT ON grocery_app_db.Store TO 'customer'@'localhost';
-GRANT SELECT ON grocery_app_db.Products TO 'customer'@'localhost';
-GRANT SELECT ON grocery_app_db.Images TO 'customer'@'localhost';
-GRANT SELECT ON grocery_app_db.Price_History TO 'customer'@'localhost';
+INSERT INTO Store (Name, Location, Hours_of_Operation) VALUES ('WholeFoods', '28.44921189779061,-81.47650365815794', '08:00am-10:00pm');
+INSERT INTO Products (Store_ID, Name, Quantity) VALUES (1, 'test_product_1', 'test_quantity');
+INSERT INTO Price_History (Product_ID, Sale_Type, Price, Start_Date, End_Date) VALUES (1, 'test_sale_type_1', 3.14, '2020-01-01 15:10:10', '2020-01-01 15:10:10');
+INSERT INTO Cur_Price VALUES (1, 'test_sale_type_1', 3.14, 1);
+INSERT INTO User VALUES ('test_user_1', 'pbkdf2:sha256:150000$iij8501J$7941a86191d414ff233a8239939dacab895b5b18a74e5e4ad607f5849076bb98');
+INSERT INTO User_Lists VALUES ('test_user_1', 1, 'test_sale_type_1', '2020-01-01 15:10:10', 1);
 
-GRANT SELECT, INSERT, DELETE ON grocery_app_db.User_Lists TO 'customer'@'localhost';
-GRANT SELECT, INSERT, DELETE ON grocery_app_db.User_Alert_Lists TO 'customer'@'localhost';
+CREATE USER 'customer'@'127.0.0.1' IDENTIFIED BY '1234';
+
+GRANT SELECT ON grocery_app_db.Store TO 'customer'@'127.0.0.1';
+GRANT SELECT ON grocery_app_db.Products TO 'customer'@'127.0.0.1';
+GRANT SELECT ON grocery_app_db.Images TO 'customer'@'127.0.0.1';
+GRANT SELECT ON grocery_app_db.Price_History TO 'customer'@'127.0.0.1';
+
+GRANT SELECT, INSERT, DELETE ON grocery_app_db.User_Lists TO 'customer'@'127.0.0.1';
+GRANT SELECT, INSERT, DELETE ON grocery_app_db.User_Alert_Lists TO 'customer'@'127.0.0.1';
+

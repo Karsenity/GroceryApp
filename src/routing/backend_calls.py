@@ -18,18 +18,6 @@ def add_products(products):
     c = db.cursor()
 
     for product in products:
-        """
-        Check for item in products:
-        if name doesn't exist:
-            add to table
-        if price doesn't equal stored price:
-            make new price_history
-            update products with new price_history
-        if new_end_date != cur_end_date:
-            update price_history
-            update products with new price_history
-        if 
-        """
         pass
 
     #     d = getAdminDatabase()
