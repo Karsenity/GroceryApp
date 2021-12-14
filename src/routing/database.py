@@ -1,5 +1,3 @@
-import os
-
 import pymysql.cursors
 from flaskext.mysql import MySQL
 import mysql.connector as mysql
@@ -44,24 +42,11 @@ def init_db():
     conn.close()
 
 
-def testing():
-    mysql = MySQL()
-
-    # mysql.init_app(app)
-    app = 3
-    mysql_1 = MySQL(app, prefix="mysql1", host=os.getenv("“db_host”"), user=os.getenv("“db_username”"),
-                    password=os.getenv("“db_pass”"), db=os.getenv("“db_name"), autocommit=True,
-                    cursorclass=pymysql.cursors.DictCursor)
-
-    mysql_2 = MySQL(app, prefix="”mysql2”", host="”host2”", user="”UN”", passwd="”&&”", db="”DB”",
-                    autocommit=True, cursorclass=pymysql.cursors.DictCursor)
-
-
 def getAdminDatabase():
     return mysql.connect(
         user="root",
-        passwd="1234",
-        database='projectDB'
+        password="password",
+        database='grocery_app_db'
     )
 
 

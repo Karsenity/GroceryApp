@@ -13,7 +13,7 @@ CREATE TABLE Products (
    Product_ID BIGINT NOT NULL AUTO_INCREMENT,
    Store_ID BIGINT NOT NULL,
    Name VARCHAR(50) NOT NULL,
-   Quantity INT NOT NULL,
+   Quantity VARCHAR(30) NOT NULL,
    Link_To_Item_URL VARCHAR(120),
    PRIMARY KEY ( Product_ID ),
    FOREIGN KEY (Store_ID) REFERENCES Store(Store_ID)
