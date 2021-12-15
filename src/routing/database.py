@@ -42,13 +42,5 @@ def init_db():
     conn.close()
 
 
-def getAdminDatabase():
-    return mysql.connect(
-        user="root",
-        password="password",
-        database='grocery_app_db'
-    )
-
-
 def getConnection(host, user, password, db='maybe', prefix='varName'):
     return
