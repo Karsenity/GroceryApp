@@ -14,7 +14,7 @@ from Scrapers.webDriver import WebDriver
 def getAdminDatabase():
     return mysql.connect(
         user="root",
-        password="password",
+        password="1234",
         database='grocery_app_db'
     )
 
@@ -45,7 +45,7 @@ def add_products(products):
                 changeURLCommand = "UPDATE products SET Link_To_Item_URL = %s WHERE (Store_ID = %s) AND (Name = %s) " \
                                    "AND (Quantity = %s)"
                 c.execute(changeURLCommand, (p.url, p.storeID, p.name, p.quantity))
-                print("\tURL CHANGED")
+                # print("\tURL CHANGED")
 
             # Make sure image URLs are the same
             getImagesCommand = "SELECT Image_URL FROM images WHERE Product_ID = %s"
@@ -59,7 +59,7 @@ def add_products(products):
                 else:
                     mustUpdate = True
             if len(curLooking) != 0 or mustUpdate:
-                print("\tNEW IMAGES IDENTIFIED!")
+                # print("\tNEW IMAGES IDENTIFIED!")
                 # We have new imageURLs
                 removeAllImageURLCommand = "DELETE FROM images WHERE Product_ID = %s"
                 c.execute(removeAllImageURLCommand, (result[0]['Product_ID'],))
@@ -70,7 +70,7 @@ def add_products(products):
 
         # Item does not exist
         if len(result) == 0:
-            print("NEW ITEM BEING ADDED!")
+            # print("NEW ITEM BEING ADDED!")
             # Insert into products table
             insertProductCommand = 'INSERT INTO products (Store_ID, Name, Quantity, Link_To_Item_URL) VALUES ' \
                                    "(%s, %s, %s, %s);"
@@ -101,7 +101,7 @@ def add_products(products):
 
         # Product already exists
         else:
-            print("ITEM ALREADY EXISTS")
+            # print("ITEM ALREADY EXISTS")
             result = result[0]
             getPricesCommand = "SELECT * FROM cur_price WHERE (Product_ID = %s)"
             c.execute(getPricesCommand, (int(result["Product_ID"]),))
@@ -114,7 +114,7 @@ def add_products(products):
                     # Found Same Sale Type
                     found = True
                     if str(i['Price']) != str("%g" % p.price):
-                        print("\tDIFFERENT PRICES IDENTIFIED")
+                        # print("\tDIFFERENT PRICES IDENTIFIED")
                         # Different prices stored for Same Sale Type
                         # Update [cur_prices] AND [price_history]
                         updatePriceCommand = "UPDATE cur_price SET Price = %s WHERE (Product_ID = %s) AND " \
@@ -132,7 +132,7 @@ def add_products(products):
                         startDate = dates['Start_Date'].strftime('%Y-%m-%d')
                         endDate = dates['End_Date'].strftime('%Y-%m-%d')
                         if startDate != p.saleRange[0] or endDate != p.saleRange[1]:
-                            print("\tNEW SALE TIMES LOCATED!")
+                            # print("\tNEW SALE TIMES LOCATED!")
                             updateSaleTimesCommand = "UPDATE price_history SET Start_date = %s, End_Date = %s" \
                                                      " WHERE Price_History_ID = %s"
                             c.execute(updateSaleTimesCommand, (p.saleRange[0], p.saleRange[1], i['Price_History_ID']))
@@ -140,7 +140,7 @@ def add_products(products):
 
             # No Sale Type for Product
             if not found:
-                print("\tNEW SALE FOR EXISTING PRODUCT FOUND!")
+                # print("\tNEW SALE FOR EXISTING PRODUCT FOUND!")
                 # Insert into [price_history] AND [cur_price] (if endDate > currentDate)
                 insertHistoryCommand = 'INSERT INTO price_history (Product_ID, Sale_Type, Price, Start_Date, End_Date)' \
                                        " VALUES (%s, %s, %s, %s, %s)"
@@ -154,7 +154,7 @@ def add_products(products):
                         greater = True
                         break
                 if greater:
-                    print("\tCURRENTLY RUNNING SALE, ADDDED TO CURRENT PRICES!")
+                    # print("\tCURRENTLY RUNNING SALE, ADDDED TO CURRENT PRICES!")
                     # This needs to be added to [cur_prices]
                     subSearch = "SELECT Price_History_ID FROM price_history WHERE (Product_ID = %s) AND " \
                                 "(Sale_Type = %s)"
@@ -163,7 +163,7 @@ def add_products(products):
                     insertCurPriceCommand = 'INSERT INTO cur_price (Product_ID, Sale_Type, Price, Price_History_ID)' \
                                             " VALUES (%s, %s, %s, %s)"
                     c.execute(insertCurPriceCommand, (result['Product_ID'], p.typeOfSale, p.price, priceHistoryID))
-    print("%d Products Processed!\n" % len(products))
+    # print("%d Products Processed!\n" % len(products))
     return
 
 
@@ -240,14 +240,14 @@ def formatProducts(name, prices, pics, durationText, url):
 
 
 class WholeFoods:
-    def __init__(self):
+    def __init__(self, products=None):
         self.webDriver = None  # Handles executing our commands
         self.driver = None
         self.name = 'WholeFoods'
         self.links = []  # This stores the current batch of links
         self.categories = []  # This stores strings of all the categories
         self.setup()
-        self.fillEvents()
+        self.fillEvents(products)
         return
 
     # This opens a Chrome window
@@ -274,18 +274,25 @@ class WholeFoods:
     #   goToHome() ->  dealWithLocation -> selectLocation -> ExpandCategories -> ScrapeCategories -> _scrapeCategories
     #       -> openCategoryPage -> loadMore -> GetAllLinks -> ScrapeProducts -> -> OpenProductPage -> _scrapeProduct
     #       -> add_products -> Go Home -> Expand Categories -> loop :)
-    def fillEvents(self):
-        self.goToHome()  # Go to main page
-        self.dealWithLocation()  # If the Location box exists, fill in our address
-        self.expandCategories()  # Show all categories
-        self.scrapeCategories()  # Being scraping each category 1 by 1. More details over that function
+    def fillEvents(self, products):
+        if products is not None:
+            self.goToHome()
+            self.dealWithLocation()
+            openURL = functools.partial(self.scrapeProducts, products)
+            goToURL = Event(openURL, sourceName="Prepare the scrape", description="Open a product's page")
+            self.webDriver.addEvent(goToURL)
+        else:
+            self.goToHome()  # Go to main page
+            self.dealWithLocation()  # If the Location box exists, fill in our address
+            self.expandCategories()  # Show all categories
+            self.scrapeCategories()  # Being scraping each category 1 by 1. More details over that function
         return
 
     def restart(self):
         def r():
             self.links = []
             self.categories = []
-            self.fillEvents()
+            self.fillEvents(None)
 
         res = functools.partial(r)
         restartEvent = Event(res, failedEvent=res, sourceName="Restart Everything to Scrape Anew",
@@ -294,7 +301,6 @@ class WholeFoods:
 
     def scrapeProducts(self, urls=None):
         if urls is None:
-            sites = self.links
             sites = self.links
         else:
             sites = urls
@@ -316,7 +322,7 @@ class WholeFoods:
 
     def _scrapeProduct(self, driver):
         # Check if it is in stock
-        print(driver.current_url)
+        # print(driver.current_url)
         try:
             div = driver.find_element(By.CLASS_NAME, 'w-pie--sold-in-store')
             if div.text.find('Currently not sold') != -1:
@@ -430,7 +436,7 @@ class WholeFoods:
                 for d in divs:
                     linkDiv = d.find_element(By.TAG_NAME, 'a')
                     if linkDiv.text == category:
-                        print("\n\ncategory\n\n")
+                        # print("\n\ncategory\t%s\n\n" % category)
                         linkDiv.click()
                         break
             else:
@@ -580,7 +586,7 @@ def add_products(products):
                 changeURLCommand = "UPDATE products SET Link_To_Item_URL = %s WHERE (Store_ID = %s) AND (Name = %s) " \
                                    "AND (Quantity = %s)"
                 c.execute(changeURLCommand, (p.url, p.storeID, p.name, p.quantity))
-                print("\tURL CHANGED")
+                # print("\tURL CHANGED")
 
             # Make sure image URLs are the same
             getImagesCommand = "SELECT Image_URL FROM images WHERE Product_ID = %s"
@@ -594,7 +600,7 @@ def add_products(products):
                 else:
                     mustUpdate = True
             if len(curLooking) != 0 or mustUpdate:
-                print("\tNEW IMAGES IDENTIFIED!")
+                # print("\tNEW IMAGES IDENTIFIED!")
                 # We have new imageURLs
                 removeAllImageURLCommand = "DELETE FROM images WHERE Product_ID = %s"
                 c.execute(removeAllImageURLCommand, (result[0]['Product_ID'],))
@@ -605,7 +611,7 @@ def add_products(products):
 
         # Item does not exist
         if len(result) == 0:
-            print("NEW ITEM BEING ADDED!")
+            # print("NEW ITEM BEING ADDED!")
             # Insert into products table
             insertProductCommand = 'INSERT INTO products (Store_ID, Name, Quantity, Link_To_Item_URL) VALUES ' \
                                    "(%s, %s, %s, %s);"
@@ -636,7 +642,7 @@ def add_products(products):
 
         # Product already exists
         else:
-            print("ITEM ALREADY EXISTS")
+            # print("ITEM ALREADY EXISTS")
             result = result[0]
             getPricesCommand = "SELECT * FROM cur_price WHERE (Product_ID = %s)"
             c.execute(getPricesCommand, (int(result["Product_ID"]),))
@@ -649,7 +655,7 @@ def add_products(products):
                     # Found Same Sale Type
                     found = True
                     if str(i['Price']) != str("%g" % p.price):
-                        print("\tDIFFERENT PRICES IDENTIFIED")
+                        # print("\tDIFFERENT PRICES IDENTIFIED")
                         # Different prices stored for Same Sale Type
                         # Update [cur_prices] AND [price_history]
                         updatePriceCommand = "UPDATE cur_price SET Price = %s WHERE (Product_ID = %s) AND " \
@@ -667,7 +673,7 @@ def add_products(products):
                         startDate = dates['Start_Date'].strftime('%Y-%m-%d')
                         endDate = dates['End_Date'].strftime('%Y-%m-%d')
                         if startDate != p.saleRange[0] or endDate != p.saleRange[1]:
-                            print("\tNEW SALE TIMES LOCATED!")
+                            # print("\tNEW SALE TIMES LOCATED!")
                             updateSaleTimesCommand = "UPDATE price_history SET Start_date = %s, End_Date = %s" \
                                                      " WHERE Price_History_ID = %s"
                             c.execute(updateSaleTimesCommand, (p.saleRange[0], p.saleRange[1], i['Price_History_ID']))
@@ -675,7 +681,7 @@ def add_products(products):
 
             # No Sale Type for Product
             if not found:
-                print("\tNEW SALE FOR EXISTING PRODUCT FOUND!")
+                # print("\tNEW SALE FOR EXISTING PRODUCT FOUND!")
                 # Insert into [price_history] AND [cur_price] (if endDate > currentDate)
                 insertHistoryCommand = 'INSERT INTO price_history (Product_ID, Sale_Type, Price, Start_Date, End_Date)' \
                                        " VALUES (%s, %s, %s, %s, %s)"
@@ -689,7 +695,7 @@ def add_products(products):
                         greater = True
                         break
                 if greater:
-                    print("\tCURRENTLY RUNNING SALE, ADDDED TO CURRENT PRICES!")
+                    # print("\tCURRENTLY RUNNING SALE, ADDDED TO CURRENT PRICES!")
                     # This needs to be added to [cur_prices]
                     subSearch = "SELECT Price_History_ID FROM price_history WHERE (Product_ID = %s) AND " \
                                 "(Sale_Type = %s)"
@@ -698,5 +704,5 @@ def add_products(products):
                     insertCurPriceCommand = 'INSERT INTO cur_price (Product_ID, Sale_Type, Price, Price_History_ID)' \
                                             " VALUES (%s, %s, %s, %s)"
                     c.execute(insertCurPriceCommand, (result['Product_ID'], p.typeOfSale, p.price, priceHistoryID))
-    print("%d Products Processed!\n" % len(products))
+    # print("%d Products Processed!\n" % len(products))
     return
