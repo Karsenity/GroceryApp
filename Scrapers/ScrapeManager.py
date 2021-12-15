@@ -1,5 +1,5 @@
-from Scrapers.Stores.Walmart import Walmart
-from Scrapers.Stores.WholeFoods import WholeFoods
+from Stores.Walmart import Walmart
+from Stores.WholeFoods import WholeFoods
 
 
 class ScrapeManager:

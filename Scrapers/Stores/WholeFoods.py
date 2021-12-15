@@ -6,9 +6,9 @@ import selenium.common
 import mysql.connector as mysql
 from selenium.webdriver.common.by import By
 
-from Scrapers.Event import Event
-from Scrapers.Product import Product
-from Scrapers.webDriver import WebDriver
+from Event import Event
+from Product import Product
+from webDriver import WebDriver
 
 
 def getAdminDatabase():

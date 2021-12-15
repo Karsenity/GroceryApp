@@ -1,11 +1,7 @@
-import time
-import traceback
-
+import os
 import selenium.common
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-
-from FilePathFinder import Config
 
 
 class WebDriver:
@@ -21,7 +17,8 @@ class WebDriver:
             if not self.visible:
                 chromeOptions.add_argument('--headless')
 
-            path = Config().getPath('Scrapers/ChromeDriver/chromedriverLinux')
+            path = '/usr/bin/chromedriver/chromedriver'
+            os.chmod(path, 0o755)
             # path = Config().getPath('Scrapers/ChromeDriver/chromedriverWindows.exe')
             self.driver = webdriver.Chrome(executable_path=path, chrome_options=chromeOptions)
         return
@@ -58,7 +55,7 @@ class WebDriver:
             except selenium.common.exceptions.InvalidSessionIdException:
                 return False
 
-        # self.fancyPrint()
+        self.fancyPrint()
         e = self.events.pop(0)
         self._runEvent(e)
         return True

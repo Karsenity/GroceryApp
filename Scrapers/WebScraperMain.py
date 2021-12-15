@@ -1,4 +1,4 @@
-from Scrapers.ScrapeManager import ScrapeManager
+from ScrapeManager import ScrapeManager
 
 
 # Testing World
