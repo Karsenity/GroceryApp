@@ -2,6 +2,7 @@ import os
 import selenium.common
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common import desired_capabilities
 
 
 class WebDriver:
@@ -10,10 +11,12 @@ class WebDriver:
         self.driver = None
         self.events = []
         self.fails = 0
-
         if self.driver is None:
             chromeOptions = Options()
             chromeOptions.add_argument('--start-maximized')
+            chromeOptions.add_argument('--no-sandbox')
+            chromeOptions.add_argument('--disable-dev-shm-usage')
+            chromeOptions.add_argument('--headless')
             if not self.visible:
                 chromeOptions.add_argument('--headless')
 
@@ -21,6 +24,7 @@ class WebDriver:
             os.chmod(path, 0o755)
             # path = Config().getPath('Scrapers/ChromeDriver/chromedriverWindows.exe')
             self.driver = webdriver.Chrome(executable_path=path, chrome_options=chromeOptions)
+            self.driver.set_window_size(1920, 1080)
         return
 
     def goTo(self, url):
@@ -55,7 +59,7 @@ class WebDriver:
             except selenium.common.exceptions.InvalidSessionIdException:
                 return False
 
-        self.fancyPrint()
+        # self.fancyPrint()
         e = self.events.pop(0)
         self._runEvent(e)
         return True

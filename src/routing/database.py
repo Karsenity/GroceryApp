@@ -26,12 +26,6 @@ class Database:
                      password="1234", db="grocery_app_db", autocommit=True,
                      cursorclass=pymysql.cursors.DictCursor)
 
-        # return mysql.connect(
-        #     user="root",
-        #     passwd="1234",
-        #     database='projectDB'
-        # )
-
 
 def init_db():
     conn = mysql.connect(user="root", password="password")
@@ -41,6 +35,3 @@ def init_db():
         cur.execute(sql_as_string)
     conn.close()
 
-
-def getConnection(host, user, password, db='maybe', prefix='varName'):
-    return

@@ -47,12 +47,12 @@ def register():
     Validates that the username is not already taken. Hashes the
     password for security.
     """
+    error = None
 
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
         db = Database().admin.get_db().cursor()
-        error = None
 
         if not username:
             error = "Username is required."
@@ -62,8 +62,7 @@ def register():
         if error is None:
             try:
                 db.execute(
-                    "INSERT INTO User(Username, Password) "
-                    "VALUES (%s, %s)", (username, generate_password_hash(password),)
+                    "INSERT INTO User VALUES (%s, %s)", (username, generate_password_hash(password))
                 )
             except Exception as e:
                 # The username was already taken, which caused the
@@ -74,7 +73,7 @@ def register():
                 return redirect(url_for("auth.login"))
         flash(error)
 
-    return render_template("auth/register.html")
+    return render_template("auth/register.html", error=error)
 
 
 @auth.route("/login", methods=("GET", "POST"))

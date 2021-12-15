@@ -2,11 +2,17 @@
 
 FROM mysql:latest
 
+ENV DISPLAY=:99
 RUN apt-get update \
-    && apt-get install -y python3 python3-pip \
-    && apt-get install unzip \
-    && apt-get install -y wget \
+    && apt-get install -y python3 \
+        python3-pip \
+        unzip \
+        wget \
+        libnss3 \
+        libxcb1 \
     && wget -N https://chromedriver.storage.googleapis.com/96.0.4664.45/chromedriver_linux64.zip -P ~/Downloads \
+    && wget -N https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && apt install -y ./google-chrome-stable_current_amd64.deb \
     && unzip ~/Downloads/chromedriver_linux64.zip -d ~/Downloads \
     && chmod +x ~/Downloads/chromedriver \
     && mv -f ~/Downloads/chromedriver /usr/local/share/chromedriver

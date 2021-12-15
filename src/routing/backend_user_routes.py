@@ -23,7 +23,7 @@ def add_transaction(price_history_ID, count):
 			"Time_Added": datetime.now(),
 			"Count_of_Item": int(count)
 		}
-		db = Database.user.get_db().cursor()
+		db = Database.admin.get_db().cursor()
 		db.execute("INSERT INTO Transaction (Price_History_ID, Username, Time_Added, Count_of_Item) "
 				   "VALUES (%s, %s, %s, %s)",
 				   tuple(entry.values()),)

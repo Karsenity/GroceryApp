@@ -11,14 +11,12 @@
 					<input type="text" class="form-control input-lg w-75 mx-auto text-center bg-light" id="username" name="username" placeholder="Enter Username" required>
 				</div>
 				<div class="form-group">
-					<label class="h5" for="pwd">Password</label>
-					<input type="password" class="form-control input-lg w-75 mx-auto text-center bg-light" id="pwd" name="pwd" placeholder="Enter Password" required>
+					<label class="h5" for="password">Password</label>
+					<input type="password" class="form-control input-lg w-75 mx-auto text-center bg-light" id="password" name="password" placeholder="Enter Password" required>
 				</div>
 
-				{% if invalid == True %}
-				<p class="text-danger card-title">Login failed. Please try again.</p>
-				{% else %}
-				<br>
+				{% if error %}
+				    <p class="text-danger card-title">Registration failed. Please try again.</p>
 				{% endif %}
 				<button type="submit" class="btn-lg btn-dark">Register</button>
 			</form>
