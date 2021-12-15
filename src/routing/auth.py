@@ -37,7 +37,7 @@ def load_logged_in_user():
     if username is None:
         g.user = None
     else:
-        db.execute("SELECT * FROM User WHERE Username = '%s'" % username)
+        db.execute("SELECT * FROM User WHERE Username = %s", (username,))
         g.user = (db.fetchone())
 
 
@@ -63,7 +63,7 @@ def register():
             try:
                 db.execute(
                     "INSERT INTO User(Username, Password) "
-                    "VALUES ('%s', '%s')" % (username, generate_password_hash(password))
+                    "VALUES (%s, %s)", (username, generate_password_hash(password),)
                 )
             except Exception as e:
                 # The username was already taken, which caused the
@@ -85,7 +85,7 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
         db = Database().admin.get_db().cursor()
-        db.execute("SELECT * FROM User WHERE Username = '%s'" % username)
+        db.execute("SELECT * FROM User WHERE Username = %s", (username,))
         user = db.fetchone()
         if user is None:
             error = "Incorrect username."
