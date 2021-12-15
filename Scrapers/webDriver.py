@@ -21,7 +21,8 @@ class WebDriver:
             if not self.visible:
                 chromeOptions.add_argument('--headless')
 
-            path = Config().getPath('Scrapers/ChromeDriver/chromedriver.exe')
+            path = Config().getPath('Scrapers/ChromeDriver/chromedriverLinux')
+            # path = Config().getPath('Scrapers/ChromeDriver/chromedriverWindows.exe')
             self.driver = webdriver.Chrome(executable_path=path, chrome_options=chromeOptions)
         return
 
