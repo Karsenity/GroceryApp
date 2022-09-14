@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+
+	<main role="main">
+		<div class="container text-center justify-content-center bg-white border shadow py-5 px-2 w-25" style="margin-top:300px;margin-left:auto;margin-right:auto">
+			<h1>Register Account</h1>
+			<hr class="w-50"><br>
+            <form role="form" name="login" method="post">
+                <div class="form-group">
+					<label class="h5" for="username">Username</label>
+					<input type="text" class="form-control input-lg w-75 mx-auto text-center bg-light" id="username" name="username" placeholder="Enter Username" required>
+				</div>
+				<div class="form-group">
+					<label class="h5" for="password">Password</label>
+					<input type="password" class="form-control input-lg w-75 mx-auto text-center bg-light" id="password" name="password" placeholder="Enter Password" required>
+				</div>
+
+				{% if error %}
+				    <p class="text-danger card-title">Registration failed. Please try again.</p>
+				{% endif %}
+				<button type="submit" class="btn-lg btn-dark">Register</button>
+			</form>
+		</div>
+	</main>
+
+{% endblock %}

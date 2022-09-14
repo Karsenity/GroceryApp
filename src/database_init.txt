@@ -1,0 +1,102 @@
+CREATE DATABASE grocery_app_db;
+USE grocery_app_db;
+
+CREATE TABLE Store (
+    Store_ID BIGINT NOT NULL AUTO_INCREMENT,
+    Name VARCHAR(50) NOT NULL,
+    Location VARCHAR(50),
+    Hours_of_Operation VARCHAR(50),
+    PRIMARY KEY (Store_ID)
+);
+
+CREATE TABLE Products (
+   Product_ID BIGINT NOT NULL AUTO_INCREMENT,
+   Store_ID BIGINT NOT NULL,
+   Name VARCHAR(128) NOT NULL,
+   Quantity VARCHAR(30) NOT NULL,
+   Link_To_Item_URL VARCHAR(248),
+   PRIMARY KEY ( Product_ID ),
+   FOREIGN KEY (Store_ID) REFERENCES Store(Store_ID)
+);
+
+CREATE TABLE Images (
+    Product_ID BIGINT NOT NULL,
+    Image_URL VARCHAR(500),
+    PRIMARY KEY (Product_ID, Image_URL),
+    FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID)
+);
+
+CREATE TABLE User (
+  Username VARCHAR(102) NOT NULL,
+  Password VARCHAR(102) NOT NULL,
+  PRIMARY KEY (Username)
+);
+
+CREATE TABLE User_Lists (
+    Username VARCHAR(102) NOT NULL,
+    Product_ID BIGINT NOT NULL,
+    Sale_Type VARCHAR(50) NOT NULL,
+    Time_Added DATETIME,
+    Count INT NOT NULL,
+    PRIMARY KEY (Username, Product_ID, Sale_Type),
+    FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID),
+    FOREIGN KEY (Username) REFERENCES User(Username)
+);
+
+CREATE TABLE User_Alert_Lists (
+  Username VARCHAR(102) NOT NULL,
+  Product_ID BIGINT NOT NULL,
+  Time_Added DATETIME,
+  PRIMARY KEY (Username,Product_ID),
+  FOREIGN KEY (Username) REFERENCES User(Username),
+  FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID)
+);
+
+CREATE TABLE Price_History (
+    Price_History_ID BIGINT NOT NULL AUTO_INCREMENT,
+    Product_ID BIGINT NOT NULL,
+    Sale_Type varchar(50),
+    Price FLOAT,
+    Start_Date DATETIME,
+    End_Date DATETIME,
+    PRIMARY KEY (Price_History_ID),
+    FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID)
+);
+
+CREATE TABLE Cur_Price (
+    Product_ID BIGINT NOT NULL,
+    Sale_Type varchar(50),
+    Price FLOAT,
+    Price_History_ID BIGINT NOT NULL,
+    PRIMARY KEY (Product_ID, Sale_Type),
+    FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID),
+    FOREIGN KEY (PRICE_HISTORY_ID) REFERENCES Price_History(Price_History_ID)
+);
+
+CREATE TABLE Transaction (
+    Transaction_ID BIGINT NOT NULL AUTO_INCREMENT,
+    Price_History_ID BIGINT NOT NULL,
+    Username VARCHAR(102) NOT NULL,
+    Time_Added DATETIME NOT NULL,
+    Count_of_Item INT NOT NULL,
+    PRIMARY KEY (Transaction_ID),
+    FOREIGN KEY (Price_History_ID) REFERENCES Price_History(Price_History_ID),
+    FOREIGN KEY (Username) REFERENCES User(Username)
+);
+
+INSERT INTO Store (Name, Location, Hours_of_Operation) VALUES ('WholeFoods', '28.44921189779061,-81.47650365815794', '08:00am-10:00pm');
+INSERT INTO Products (Store_ID, Name, Quantity) VALUES (1, 'test_product_1', 'test_quantity');
+INSERT INTO Price_History (Product_ID, Sale_Type, Price, Start_Date, End_Date) VALUES (1, 'test_sale_type_1', 3.14, '2020-01-01 15:10:10', '2020-01-01 15:10:10');
+INSERT INTO Cur_Price VALUES (1, 'test_sale_type_1', 3.14, 1);
+INSERT INTO grocery_app_db.User VALUES ('test_user_1', 'pbkdf2:sha256:150000$iij8501J$7941a86191d414ff233a8239939dacab895b5b18a74e5e4ad607f5849076bb98');
+INSERT INTO grocery_app_db.User_Lists VALUES ('test_user_1', 1, 'test_sale_type_1', '2020-01-01 15:10:10', 1);
+
+CREATE USER 'customer'@'127.0.0.1' IDENTIFIED BY '1234';
+
+GRANT SELECT ON grocery_app_db.Store TO 'customer'@'127.0.0.1';
+GRANT SELECT ON grocery_app_db.Products TO 'customer'@'127.0.0.1';
+GRANT SELECT ON grocery_app_db.Images TO 'customer'@'127.0.0.1';
+GRANT SELECT ON grocery_app_db.Price_History TO 'customer'@'127.0.0.1';
+
+GRANT SELECT, INSERT, DELETE ON grocery_app_db.User_Lists TO 'customer'@'127.0.0.1';
+GRANT SELECT, INSERT, DELETE ON grocery_app_db.User_Alert_Lists TO 'customer'@'127.0.0.1';

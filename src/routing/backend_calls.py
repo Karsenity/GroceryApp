@@ -1,36 +1,10 @@
 import mysql.connector as mysql
 
+from src.routing.database import Database
+
 
 def connect_admin_level():
-    return mysql.connect(
-        user="root",
-        passwd="1234",
-        database='projectDB'
-    )
-
-
-# Date = YYYY-MM-DD
-def add_products(products):
-    """
-    This adds a Product to our [Products] Table
-
-    :return: Pass/Failed
-        :rtype: Boolean
-    """
-    print(products[0], end='\n\n')
-    db = connect_admin_level()
-    c = db.cursor()
-    c.close()
-    #     d = getAdminDatabase()
-    #     lines = f.readlines()
-    #     for l in lines:
-    #         storeID = 1
-    #
-    #         sqlCommand = "INSERT INTO Products (Store_ID, Name, Price_History, Link_To_Item_URL) VALUES " \
-    #                      "()'
-    #         d.cursor().execute()
-
-    return
+    return Database().admin.get_db()
 
 
 def add_store():

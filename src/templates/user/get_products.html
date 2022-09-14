@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+		<div class="container text-center justify-content-center bg-white border shadow py-5 px-2 w-25" style="margin-top:300px;margin-left:auto;margin-right:auto">
+			<h1>Search for Products</h1>
+			<hr class="w-50"><br>
+            <form role="form" name="searchbox" method="post">
+                <div class="form-group">
+					<label class="h5" for="search_term">Search</label>
+					<input type="text" class="form-control input-lg w-75 mx-auto text-center bg-light" id="search_term" name="search_term" placeholder="Search" required>
+				</div>
+				<button type="submit" class="btn-lg btn-dark">Search</button>
+			</form>
+		</div>
+{% endblock %}
